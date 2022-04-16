@@ -59,7 +59,11 @@ def handle_usr_connection(server):
         while True:
             data = conn.recv(4096)
             if data: # If client socket was closed the recieved data will be falsy (but it still recieves data)
-                data = user.username  + ': ' + data.decode('utf-8') + '\n'  # Username: message
+                data = data.decode('utf-8')
+                # When recieving data from Java client, two first characters should be removed in order to avoid odd behavior
+                # Python client noticed this and adds two blanks at the beggining to preserve the message integrity
+                data = data[2:]
+                data = user.username  + ': ' + data + '\n'  # Username: message
                 send_to_all_but_me(user, data.encode('utf-8'))
             else:
                 # Gotta remove the socket obj of the former usr (which will be closed) to avoid broken pipe

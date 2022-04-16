@@ -15,11 +15,7 @@ def look_for_messages(client):
     while True:
         message = client.recv(4096).decode('utf-8')
         if message:
-            print(
-                f'{message}'.replace(
-                    '\n', ''
-                    ).strip()
-                )  # Removing \n from message (it was added to reach Java compatibility)
+            print(f'{message}')
         else:
             break
 
@@ -27,14 +23,16 @@ def look_for_messages(client):
 def send_message(client):
     '''
     Function waits for an input and sends that message
-    to the server
+    to the server.
+
+    Note: We add two blanks at the input's beggining, thus to help the server
+          to work with java clients. This blank spaces will be removed by the server.
     '''
     while True:
-        usr_input = input()
-        # Using sendall instead of send because sendall ensures that
-        # all the data that was requested to send was sent.
-        # Also encode the data to sent it as bytes-like
-        client.sendall(usr_input.encode('utf-8'))
+        usr_input = '  ' + input()
+        usr_input = usr_input.encode('utf-8')
+
+        client.sendall(usr_input)  # sending actual message
 
 
 def main():
