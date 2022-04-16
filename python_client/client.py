@@ -1,8 +1,6 @@
 import socket
 import threading
 
-#SERVER_HOST = socket.gethostbyname(socket.gethostname())
-# unncomment the above and erease below when using all clients and server in same machine
 SERVER_HOST = '192.168.1.11' # here goes you host private ip adress, this may be different for you
 SERVER_PORT = 8080
 
@@ -12,20 +10,24 @@ def look_for_messages(client):
     '''
     Function for wait messages sent by the server:
         - Other user messages.
-        - Server info messages
+        - Server info messages.
     '''
     while True:
         message = client.recv(4096).decode('utf-8')
         if message:
-            print(f'\n{message}\n')
+            print(
+                f'{message}'.replace(
+                    '\n', ''
+                    ).strip()
+                )  # Removing \n from message (it was added to reach Java compatibility)
         else:
             break
 
 
 def send_message(client):
     '''
-    Function waits for an input and send that message
-    to all the other users in the chat
+    Function waits for an input and sends that message
+    to the server
     '''
     while True:
         usr_input = input()
@@ -35,8 +37,7 @@ def send_message(client):
         client.sendall(usr_input.encode('utf-8'))
 
 
-
-if __name__ == '__main__':
+def main():
     with client:
         try:
             client.connect((SERVER_HOST, SERVER_PORT))
@@ -57,5 +58,10 @@ if __name__ == '__main__':
             # Joining threads in order to keep the client socket alive
             print_messages.join()
             send_messages.join()
+
         except KeyboardInterrupt:
             print('\n\nGood Bye!')
+
+
+if __name__ == '__main__':
+    main()

@@ -1,4 +1,3 @@
-
 class User:
     '''
     User proxy class to wrap a socket object

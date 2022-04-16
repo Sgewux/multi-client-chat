@@ -1,11 +1,8 @@
 import socket
-import threading
 from concurrent.futures import ThreadPoolExecutor
 
 from user import User
 
-#HOST = socket.gethostbyname(socket.gethostname())
-# unncomment the above and erease below when using all clients and server in same machine
 HOST = '192.168.1.11' # here goes you host private ip adress, this may be different for you
 PORT = 8080
 
@@ -46,6 +43,9 @@ def handle_usr_connection(server):
          so as to avoid sending messages to that socket because will be closed.
         -notifies all the other users that a user left the chat.
         -breaks the loop.
+    
+    Note: All messages have \n added at the end, this was made in order to
+          achieve compatibility with Java client.
     '''
     global list_of_users
 
@@ -53,23 +53,23 @@ def handle_usr_connection(server):
     with conn:
         username = conn.recv(4096)
         user = User(username.decode('utf-8'), conn) 
-        log = f'{user.username} joined!'
+        log = f'{user.username} joined! \n'
         send_to_all_but_me(user, log.encode('utf-8'))
         list_of_users.append(user)  # Append user to list_of_users
         while True:
             data = conn.recv(4096)
             if data: # If client socket was closed the recieved data will be falsy (but it still recieves data)
-                data = user.username  + ': ' + data.decode('utf-8')  # Username: message
+                data = user.username  + ': ' + data.decode('utf-8') + '\n'  # Username: message
                 send_to_all_but_me(user, data.encode('utf-8'))
             else:
                 # Gotta remove the socket obj of the former usr (which will be closed) to avoid broken pipe
                 list_of_users.remove(user)
-                leaving_message = f'{user.username} left the chat.'
+                leaving_message = f'{user.username} left the chat. \n'
                 send_to_all_but_me(user, leaving_message.encode('utf-8'))
                 break
 
 
-if __name__ == '__main__':
+def main():
     num_of_clients = input('Number of clients: ')
     num_of_clients = int(num_of_clients)
     with server:
@@ -79,3 +79,7 @@ if __name__ == '__main__':
            server_socket_objects = [server for i in range(num_of_clients)]
            executor.map(handle_usr_connection, server_socket_objects)
     print('Server instance finished')
+
+
+if __name__ == '__main__':
+    main()
